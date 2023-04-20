@@ -1,3 +1,5 @@
+import { LogoutLink } from "./Logout";
+
 export function Header() {
   return (
     <header>
@@ -11,6 +13,7 @@ export function Header() {
               Search
             </button>
           </form>
+          <LogoutLink />
         </div>
       </nav>
     </header>
