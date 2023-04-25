@@ -6,6 +6,10 @@ import { PostsIndex } from "./PostsIndex";
 import { Signup } from "./Signup";
 import { Login } from "./Login";
 import { LogoutLink } from "./Logout";
+import { PostsShow } from "./PostShow";
+import { Routes, Route } from "react-router-dom";
+import { About } from "./About";
+import { PostsShowPage } from "./PostsShowPage";
 
 export function Content() {
   const [posts, setPosts] = useState([]);
@@ -28,19 +32,58 @@ export function Content() {
     setIsPostsShowVisible(false);
   };
 
+  const handleCreatePost = (params) => {
+    axios.post("http://localhost:3000/posts.json", params).then((response) => {
+      console.log(response);
+      setPosts([...posts, response.data]);
+    });
+  };
+
+  const handleUpdatePost = (params, id) => {
+    axios.patch(`http://localhost:3000/posts/${id}.json`, params).then((response) => {
+      console.log(response);
+      setCurrentPost([...posts, response.data]);
+      setPosts(
+        posts.map((post) => {
+          if (post.id === response.data.id) {
+            return response.data;
+          } else {
+            return post;
+          }
+        })
+      );
+    });
+  };
+
+  const handleDestroyPost = (post) => {
+    axios.delete(`http://localhost:3000/posts/${post.id}.json`).then((response) => {
+      console.log(response.data);
+      for (let i = 0; i < posts.length; i++) {
+        if (posts[i].id === post.id) {
+          posts.splice(i, 1);
+        }
+      }
+      setPosts(posts);
+      handleClose();
+    });
+  };
+
   useEffect(handleIndexPosts, []);
 
   return (
     <div className="container">
-      <Signup />
-      <Login />
-      <PostsNew />
-      <PostsIndex posts={posts} onShowPost={handleShowPost} />
+      <Routes>
+        <Route path="/about" element={<About />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/posts/new" element={<PostsNew onCreatePost={handleCreatePost} />} />
+        <Route path="/posts" element={<PostsIndex posts={posts} onShowPost={handleShowPost} />} />
+        <Route path="/" element={<PostsIndex posts={posts} onShowPost={handleShowPost} />} />
+        <Route path="/posts/:id" element={<PostsShowPage />} />
+      </Routes>
+
       <Modal show={isPostsShowVisible} onClose={handleClose}>
-        <h2>{currentPost.title}</h2>
-        <p>Title: {currentPost.title}</p>
-        <p>Body: {currentPost.body}</p>
-        <img src={currentPost.image} />
+        <PostsShow post={currentPost} onUpdatePost={handleUpdatePost} onDestroyPost={handleDestroyPost} />
       </Modal>
     </div>
   );

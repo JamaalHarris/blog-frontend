@@ -1,4 +1,6 @@
 import { LogoutLink } from "./Logout";
+import { Link } from "react-router-dom";
+<Link to="/about">About</Link>;
 
 export function Header() {
   return (
